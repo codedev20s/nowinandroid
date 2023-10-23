@@ -1,0 +1,38 @@
+fun isHKID(str: String): Boolean {
+    val strValidChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    if (str.length < 8) {
+        return false
+    }
+    val strUpper = str.toUpperCase()
+    val hkidPat = Regex("^([A-Z]{1,2})([0-9]{6})([A0-9])")
+    val matchResult = hkidPat.find(strUpper)
+    
+    if (matchResult == null) {
+        return false
+    }
+    
+    val matchGroups = matchResult.groupValues
+    val charPart = matchGroups[1]
+    val numPart = matchGroups[2]
+    val checkDigit = matchGroups[3]
+    
+    var checkSum = 0
+    
+    if (charPart.length == 2) {
+        checkSum += 9 * (10 + strValidChars.indexOf(charPart[0]) + 1)
+        checkSum += 8 * (10 + strValidChars.indexOf(charPart[1]) + 1)
+    } else {
+        checkSum += 9 * 36
+        checkSum += 8 * (10 + strValidChars.indexOf(charPart[0]) + 1)
+    }
+
+    for (i in numPart.indices) {
+        val j = 7 - i
+        checkSum += j * Character.getNumericValue(numPart[i])
+    }
+    
+    val remaining = checkSum % 11
+    val verify = if (remaining == 0) 0 else 11 - remaining
+    
+    return verify == checkDigit[0] || (verify == 10 && checkDigit[0] == 'A')
+}
